@@ -61,4 +61,4 @@ config:
           config:
             channel_names: 'ndvi'
             epsg_code: 25832
-            path: 'output'
+            path: 'output/ndvi'
