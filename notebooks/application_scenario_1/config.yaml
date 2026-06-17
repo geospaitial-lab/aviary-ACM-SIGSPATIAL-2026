@@ -45,6 +45,11 @@ config:
             tile_size: 500
             ground_sampling_distance: .2
 
+  tile_loader_config:
+    batch_size: 4
+    max_num_threads: null
+    num_prefetched_tiles: 1
+
   tiles_processor_config:
     package: 'aviary'
     name: 'SequentialCompositeProcessor'
