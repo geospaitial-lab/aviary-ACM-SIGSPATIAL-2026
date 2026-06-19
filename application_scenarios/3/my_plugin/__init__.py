@@ -1,1 +1,1 @@
-from .land_cover_model import LandCoverModel
+from .land_cover_model import LandCoverModel, LandCoverModelConfig
