@@ -1,0 +1,161 @@
+package: 'aviary'
+name: 'CompositePipeline'
+config:
+  plugins_dir_path: 'my_plugin'
+
+  pipeline_configs:
+    - package: 'aviary'
+      name: 'TilePipeline'
+      config:
+        show_progress: true
+
+        grid_config:
+          geojson_path: 'input/boundary.geojson'
+          ignore_json_path: 'output/processed.json'
+          strict_ignore_json_path: false
+          tile_size: 100
+          epsg_code: 25832
+          num_chunks: 500
+          chunk: 0
+
+        tile_fetcher_config:
+          package: 'aviary'
+          name: 'WMSFetcher'
+          config:
+            url: 'https://www.wms.nrw.de/geobasis/wms_nw_dop'
+            version: '1.3.0'
+            layer: 'nw_dop_rgb'
+            epsg_code: 25832
+            response_format: 'image/png'
+            channel_names:
+              - 'r'
+              - 'g'
+              - 'b'
+            tile_size: 100
+            ground_sampling_distance: .2
+            buffer_size: 20
+
+        tile_loader_config:
+          batch_size: 2
+          max_num_threads: null
+          num_prefetched_tiles: 1
+
+        tiles_processor_config:
+          package: 'aviary'
+          name: 'SequentialCompositeProcessor'
+          config:
+            tiles_processor_configs:
+              - package: 'aviary'
+                name: 'StandardizeProcessor'
+                config:
+                  channel_name: 'r'
+                  mean_value: 105.66
+                  std_value: 52.23
+              - package: 'aviary'
+                name: 'StandardizeProcessor'
+                config:
+                  channel_name: 'g'
+                  mean_value: 111.35
+                  std_value: 45.62
+              - package: 'aviary'
+                name: 'StandardizeProcessor'
+                config:
+                  channel_name: 'b'
+                  mean_value: 102.18
+                  std_value: 44.30
+              - package: 'my_plugin'
+                name: 'LandCoverModel'
+                config:
+                  r_channel_name: 'r'
+                  g_channel_name: 'g'
+                  b_channel_name: 'b'
+                  land_cover_channel_name: 'land_cover'
+                  device: 'cpu'
+              - package: 'aviary'
+                name: 'SieveProcessor'
+                config:
+                  channel_name: 'land_cover'
+                  threshold: 25
+              - package: 'aviary'
+                name: 'RemoveBufferProcessor'
+                config:
+              - package: 'aviary'
+                name: 'VectorizeProcessor'
+                config:
+                  channel_name: 'land_cover'
+                  field: 'category'
+              - package: 'aviary'
+                name: 'VectorExporter'
+                config:
+                  channel_name: 'land_cover'
+                  epsg_code: 25832
+                  path: 'output/land_cover.gpkg'
+              - package: 'aviary'
+                name: 'GridExporter'
+                config:
+                  path: 'output/processed.json'
+
+    - package: 'aviary'
+      name: 'VectorPipeline'
+      config:
+        show_progress: true
+
+        vector_loader_config:
+          package: 'aviary'
+          name: 'CompositeLoader'
+          config:
+            vector_loader_configs:
+              - package: 'aviary'
+                name: 'GPKGLoader'
+                config:
+                  path: 'output/land_cover.gpkg'
+                  epsg_code: 25832
+                  layer_name: 'land_cover'
+              - package: 'aviary'
+                name: 'GeoJSONLoader'
+                config:
+                  path: 'input/boundary.geojson'
+                  epsg_code: 25832
+                  layer_name: 'boundary'
+
+        vector_processor_config:
+          package: 'aviary'
+          name: 'SequentialCompositeProcessor'
+          config:
+            vector_processor_configs:
+              - package: 'aviary'
+                name: 'ClipProcessor'
+                config:
+                  layer_name: 'land_cover'
+                  mask_layer_name: 'boundary'
+              - package: 'aviary'
+                name: 'MapFieldProcessor'
+                config:
+                  layer_name: 'land_cover'
+                  field: 'category'
+                  mapping:
+                    0: 'Building'
+                    1: 'Greenhouse'
+                    2: 'Swimming pool'
+                    3: 'Impervious surface'
+                    4: 'Pervious surface'
+                    5: 'Bare soil'
+                    6: 'Water'
+                    7: 'Snow'
+                    8: 'Herbaceous vegetation'
+                    9: 'Agricultural land'
+                    10: 'Plowed land'
+                    11: 'Vineyard'
+                    12: 'Deciduous'
+                    13: 'Coniferous'
+                    14: 'Brushwood'
+                    15: 'Clear cut'
+                    16: 'Ligneous'
+                    17: 'Mixed'
+                    18: 'Undefined'
+              - package: 'aviary'
+                name: 'VectorExporter'
+                config:
+                  layer_name: 'land_cover'
+                  epsg_code: 25832
+                  path: 'output/land_cover.gpkg'
