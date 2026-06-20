@@ -13,9 +13,9 @@ config:
           geojson_path: 'input/boundary.geojson'
           ignore_json_path: 'output/processed.json'
           strict_ignore_json_path: false
-          tile_size: 500
+          tile_size: 100
           epsg_code: 25832
-          num_chunks: 100
+          num_chunks: 500
           chunk: 93
 
         tile_fetcher_config:
@@ -31,12 +31,12 @@ config:
               - 'r'
               - 'g'
               - 'b'
-            tile_size: 500
+            tile_size: 100
             ground_sampling_distance: .2
-            buffer_size: 100
+            buffer_size: 20
 
         tile_loader_config:
-          batch_size: 2
+          batch_size: 1
           max_num_threads: null
           num_prefetched_tiles: 0
 
