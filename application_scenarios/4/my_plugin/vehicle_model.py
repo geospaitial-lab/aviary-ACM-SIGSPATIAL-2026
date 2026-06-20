@@ -77,6 +77,11 @@ class VehicleModel(aviary.IDMixin):
             confs = res.obb.conf.tolist()
 
             for (xc, yc, w, h, r), cls_val, conf in zip(xywhr, clss, confs, strict=True):
+                value = int(cls_val) if isinstance(cls_val, (int, float)) else cls_val
+
+                if value not in (9, 10):
+                    continue
+
                 x_center = float(xc) / float(W) if W else 0.0
                 y_center_img = float(yc) / float(H) if H else 0.0
                 y_center = 1.0 - y_center_img
@@ -84,7 +89,7 @@ class VehicleModel(aviary.IDMixin):
                 height = float(h) / float(H) if H else 0.0
 
                 obj = aviary.Object(
-                    value=int(cls_val) if isinstance(cls_val, (int, float)) else cls_val,
+                    value=value,
                     x_center=x_center,
                     y_center=y_center,
                     width=width,
