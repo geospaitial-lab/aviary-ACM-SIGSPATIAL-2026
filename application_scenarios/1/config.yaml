@@ -7,8 +7,8 @@ config:
     bounding_box_coordinates:
       - 362500
       - 5715000
-      - 364500
-      - 5717000
+      - 364000
+      - 5716500
     tile_size: 500
 
   tile_fetcher_config:
@@ -46,7 +46,7 @@ config:
             ground_sampling_distance: .2
 
   tile_loader_config:
-    batch_size: 4
+    batch_size: 2
     max_num_threads: null
     num_prefetched_tiles: 1
 
