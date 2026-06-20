@@ -64,43 +64,37 @@ class VehicleModel(aviary.IDMixin):
         batched_objects: list[list[aviary.Object]] = []
 
         for img, res in zip(inputs_list, results, strict=True):
-            height, width = img.shape[0], img.shape[1]
+            H, W = img.shape[0], img.shape[1]
 
-            objects: list[aviary.Object] = []
+            objs: list[aviary.Object] = []
 
-            obb = getattr(res, 'obb', None)
-            if obb is None or getattr(obb, 'xywhr', None) is None or len(obb) == 0:
-                batched_objects.append(objects)
+            if getattr(res, 'obb', None) is None or res.obb is None or len(res.obb) == 0:
+                batched_objects.append(objs)
                 continue
 
-            xywhr = obb.xywhr.tolist()
-            clss = obb.cls.tolist()
-            confs = obb.conf.tolist()
+            xywhr = res.obb.xywhr.tolist()
+            clss = res.obb.cls.tolist()
+            confs = res.obb.conf.tolist()
 
             for (xc, yc, w, h, r), cls_val, conf in zip(xywhr, clss, confs, strict=True):
-                x_center = float(xc) / float(width) if width else 0.
-                y_center_img = float(yc) / float(height) if height else 0.
-                y_center = 1. - y_center_img
-                norm_w = float(w) / float(width) if width else 0.
-                norm_h = float(h) / float(height) if height else 0.
+                x_center = float(xc) / float(W) if W else 0.0
+                y_center_img = float(yc) / float(H) if H else 0.0
+                y_center = 1.0 - y_center_img
+                width = float(w) / float(W) if W else 0.0
+                height = float(h) / float(H) if H else 0.0
 
-                rotation = float(-r)
-
-                value = int(cls_val) if isinstance(cls_val, (int, float)) else cls_val
-
-                objects.append(
-                    aviary.Object(
-                        value=value,
-                        x_center=float(x_center),
-                        y_center=float(y_center),
-                        width=float(norm_w),
-                        height=float(norm_h),
-                        rotation=rotation,
-                        score=float(conf),
-                    )
+                obj = aviary.Object(
+                    value=int(cls_val) if isinstance(cls_val, (int, float)) else cls_val,
+                    x_center=x_center,
+                    y_center=y_center,
+                    width=width,
+                    height=height,
+                    rotation=float(-r),
+                    score=float(conf),
                 )
+                objs.append(obj)
 
-            batched_objects.append(objects)
+            batched_objects.append(objs)
 
         buffer_fraction = 0.
         for channel_name in (self._r_channel_name, self._g_channel_name, self._b_channel_name):
