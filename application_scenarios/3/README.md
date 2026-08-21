@@ -3,7 +3,7 @@
 ### Background
 
 Land cover segmentation classifies each pixel into land cover categories such as buildings, pervious and impervious surfaces, different vegetation types, and water bodies.
-In this scenario, a model from the FLAIR-HUB[^1] benchmark, previously converted to the ONNX format, is executed with ONNX Runtime.
+In this scenario, a model from the FLAIR-HUB[^1] benchmark, previously converted to the [ONNX](https://onnx.ai) format, is executed with [ONNX Runtime](https://onnxruntime.ai).
 The model is hosted on [Hugging Face](https://huggingface.co) and downloaded at runtime.
 The AOI is defined by a GeoJSON file specifying the boundary, and the aerial imagery is provided by a WMS.
 
